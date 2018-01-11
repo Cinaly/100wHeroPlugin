@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="socket.io.js"></script>
+</head>
+<body>
+<style>
+    *{
+        margin: 0;
+        padding: 0;
+    }
+
+    html, body {
+        width: 100%;
+        height: 100%;
+        float: left;
+        overflow: hidden;
+    }
+
+    #myframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+        float: left;
+    }
+
+    #leftArea, #rightArea {
+        height: 100%;
+        float: left;
+    }
+
+    #leftArea {
+        width: 55%;
+    }
+
+    #rightArea {
+        width: 44.99%;
+        padding: 25px;
+        box-sizing: border-box;
+        background-color: #eee;
+    }
+
+    #rightArea .row{
+        width: 100%;
+        float: left;
+        display: flex;
+    }
+
+    #rightArea .row .col{
+        width: 100%;
+        float: left;
+        flex: 1;
+    }
+
+    #rightArea .row .col p{
+        width: 100%;
+        text-align: center;
+    }
+
+    #rightArea em,#rightArea i{
+        color: #FF0000;
+        font-size: 16px;
+        font-style: normal;
+    }
+
+    #rightArea h1,#rightArea i{
+        font-size: 24px;
+        font-weight: bold;
+    }
+
+    #rightArea p{
+        font-size: 18px;
+    }
+</style>
+
+<div id="leftArea">
+    <iframe id="myframe" src="http://www.baidu.com/s?wd=asdasd"></iframe>
+</div>
+<div id="rightArea">
+
+</div>
+
+<script>
+
+	const CreatedIframe = (keys) => {
+
+		function _Created (key) {
+			const url    = 'http://www.baidu.com/s?wd=' + key;
+			const target = document.getElementById('leftArea');
+			console.log(target);
+			const iframe = document.createElement('iframe');
+			iframe.src   = url;
+			iframe.id    = 'myframe';
+			target.appendChild(iframe);
+		}
+
+		const myframe = document.getElementById('myframe');
+		if (myframe) {
+			myframe.parentNode.removeChild(myframe);
+			_Created(keys);
+		} else {
+			_Created(keys);
+		}
+	}
+
+	 const CreatedRightArea = (obj) => {
+		var str = '';
+
+		obj.data.forEach( (v) => {
+			str += '<p>' + v.item + '：<em>'+ v.count + '</em></p>';
+		});
+
+		var html = '<h1>'+(obj.title).replace('不是', '<i> 不是 </i>')+'</h1><br/><hr/><br/>' + str;
+		document.getElementById('rightArea').innerHTML = html;
+    }
+
+	var socket = io.connect('http://localhost:3538');
+
+		socket.on('webClient', (obj) => {
+			CreatedIframe(obj.question);
+		});
+
+		socket.on('webClientAnswer', (obj) => {
+			CreatedRightArea(obj);
+		});
+
+</script>
+
+</body>
+</html>
