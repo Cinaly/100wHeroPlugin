@@ -2,3 +2,5 @@
 .node_modules
 node_modules
 .gif
+/images/*.png
+/images/build/*.png
