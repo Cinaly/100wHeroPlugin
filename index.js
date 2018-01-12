@@ -132,9 +132,11 @@ class Main{
 		
 		return new Promise((resolve, reject) => {
 			
-			this.baiduClient.generalBasic(newImageBase64).then((result) => {
+			this.baiduClient.accurateBasic(newImageBase64).then((result) => {
 				
 				const imageTextObj = result.words_result;
+				
+				console.log(imageTextObj);
 				
 				let newKey         = '';
 				let answer         = [];

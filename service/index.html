@@ -145,15 +145,17 @@
 <script>
 
 	 const CreatedRightArea = (obj) => {
-		let str = '';
 
+		let str         = '';
 		const countTime = new Date().getTime() - obj.startTime;
 
 		obj.data.forEach( (v) => {
 			str += '<p>' + v.item + '：<em>'+ v.count + '</em></p>';
 		});
 
-		const html = '<h1>'+(obj.title).replace('不是', '<i> 不是 </i>')+'</h1><br/><hr/><br/>' + str + '<br/><p class="time">总共耗时：' + countTime + 'ms</p>';
+		const title = (obj.title).replace('不是', '<i> 不是 </i>') || '' + (obj.title).replace('不属于', '<i> 不属于 </i>') || '';
+
+		const html = '<h1>'+title+'</h1><br/><hr/><br/>' + str + '<br/><p class="time">总共耗时：' + countTime + 'ms</p>';
 		document.getElementById('rightArea').innerHTML = html;
 
 		const firstKeyItemElement                     = document.querySelector('small').closest('.item');
