@@ -1,15 +1,14 @@
 ### 依赖
 
-> 基于nodejs 6.9.5  
-> 依赖ADB命令  
-
+基于nodejs 6.9.5  
+依赖ADB命令  
 
 ### 使用方法
 
-> 第一步 下载了项目 `npm install`  
-> 第二步 修改一个符合自己设备的 `mask.png` 模板  
-> 第三步 进入根目录的 `service` 目录下，运行 `node service`  
-> 第四步 进入根目录下 运行 `node index` 执行  
+第一步 下载了项目 `npm install`  
+第二步 修改一个符合自己设备的 `mask.png` 模板  
+第三步 进入根目录的 `service` 目录下，运行 `node service`  
+第四步 进入根目录下 运行 `node index` 执行  
 
 
 ### 整体流程 
