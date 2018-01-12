@@ -1,12 +1,13 @@
 var io = require('socket.io')(3538);
 
-io.on('connection', function (socket) {
-	socket.on('sendKeyToServer', function (obj, data) {
-		console.log('webClient' + obj.question);
-		io.emit('webClient', obj);
+io.on('connection', (socket) => {
+	socket.on('sendKeyToServerQuestion', (obj) => {
+		console.log('监听到了nodeClient发过来的sendKeyToServer事件');
+		io.emit('webClientQuestion', obj);
 	});
 	
-	socket.on('sendKeyToServerAnswer', function (obj, data) {
+	socket.on('sendKeyToServerAnswer', (obj) => {
+		console.log('监听到了nodeClient发过来的sendKeyToServerAnswer事件');
 		io.emit('webClientAnswer', obj);
 	});
 });
