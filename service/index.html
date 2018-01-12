@@ -15,6 +15,22 @@
         padding: 0;
     }
 
+    em,small{
+        font-style: normal;
+        font-weight: normal;
+    }
+
+    em{
+        color: #FF0000;
+        font-size: 14px;
+    }
+
+    small{
+        color: #0188BA;
+        font-size: 18px;
+        font-weight: bold;
+    }
+
     html, body {
         width: 100%;
         height: 100%;
@@ -36,6 +52,42 @@
 
     #leftArea {
         width: 55%;
+        overflow-y: scroll;
+        overflow-x: hidden;
+        padding: 25px;
+        box-sizing: border-box;
+    }
+
+    #leftArea .list{
+        width: 100%;
+        float: left;
+    }
+
+    #leftArea .list .item{
+        width: 100%;
+        float: left;
+        margin-bottom: 30px;
+        padding-bottom: 30px;
+        border-bottom: 1px solid;
+    }
+
+    #leftArea .list .item h5{
+        width: 100%;
+        float: left;
+        font-size: 16px;
+        margin-bottom: 10px;
+    }
+
+    #leftArea .list .item h5 em,
+    #leftArea .list .item h5 small{
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    #leftArea .list .item p{
+        line-height: 160%;
+        float: left;
+        font-size: 14px;
     }
 
     #rightArea {
@@ -76,10 +128,15 @@
     #rightArea p{
         font-size: 18px;
     }
+
+    #rightArea p .time{
+        color: #FF0000;
+        font-size: 16px;
+    }
 </style>
 
 <div id="leftArea">
-    <iframe id="myframe" src="http://www.baidu.com/s?wd=asdasd"></iframe>
+
 </div>
 <div id="rightArea">
 
@@ -87,43 +144,42 @@
 
 <script>
 
-	const CreatedIframe = (keys) => {
-
-		function _Created (key) {
-			const url    = 'http://www.baidu.com/s?wd=' + key;
-			const target = document.getElementById('leftArea');
-			console.log(target);
-			const iframe = document.createElement('iframe');
-			iframe.src   = url;
-			iframe.id    = 'myframe';
-			target.appendChild(iframe);
-		}
-
-		const myframe = document.getElementById('myframe');
-		if (myframe) {
-			myframe.parentNode.removeChild(myframe);
-			_Created(keys);
-		} else {
-			_Created(keys);
-		}
-	}
-
 	 const CreatedRightArea = (obj) => {
-		var str = '';
+		let str = '';
+
+		const countTime = new Date().getTime() - obj.startTime;
 
 		obj.data.forEach( (v) => {
 			str += '<p>' + v.item + '：<em>'+ v.count + '</em></p>';
 		});
 
-		var html = '<h1>'+(obj.title).replace('不是', '<i> 不是 </i>')+'</h1><br/><hr/><br/>' + str;
+		const html = '<h1>'+(obj.title).replace('不是', '<i> 不是 </i>')+'</h1><br/><hr/><br/>' + str + '<br/><p class="time">总共耗时：' + countTime + 'ms</p>';
 		document.getElementById('rightArea').innerHTML = html;
+
+		const firstKeyItemElement                     = document.querySelector('small').closest('.item');
+		document.getElementById('leftArea').scrollTop = firstKeyItemElement.clientTop;
+
+    }
+
+    const CreatedLeftArea = (contentHtmlString) => {
+
+		const contentHtmlArr = JSON.parse(contentHtmlString);
+
+		let tplStr = '';
+
+	    contentHtmlArr.forEach((item) => {
+		    tplStr += '<div class="item">' + item['title'] + item['desc'] + '</div>';
+        });
+		const tpl = '<div class="list">'+ tplStr +'</div>';
+
+	    document.getElementById('leftArea').innerHTML = tpl;
     }
 
 	var socket = io.connect('http://localhost:3538');
 
-		socket.on('webClientQuestion', (obj) => {
+		socket.on('webClientQuestion', (contentHtmlString) => {
 			console.log('监听到了service发过来的webClientQuestion事件');
-			CreatedIframe(obj.question);
+            CreatedLeftArea(contentHtmlString);
 		});
 
 		socket.on('webClientAnswer', (obj) => {

@@ -3,10 +3,25 @@ const AipOcrClient   = require("baidu-aip-sdk").ocr;
 const request        = require('request');
 const cheerio        = require('cheerio');
 const fs             = require('fs');
+const he             = require('he');
+const colors         = require('colors');
 const images         = require("images");
 const pngquant       = require('node-pngquant-native');
 const socket         = require('socket.io-client').connect('http://localhost:3538');
 const startTime      = new Date().getTime();
+
+colors.setTheme({
+	silly: 'rainbow',
+	input: 'grey',
+	verbose: 'cyan',
+	prompt: 'red',
+	info: 'green',
+	data: 'blue',
+	help: 'cyan',
+	warn: 'yellow',
+	debug: 'magenta',
+	error: 'red'
+});
 
 class Main{
 	
@@ -25,13 +40,34 @@ class Main{
 		return new Promise((resolve, reject) => {
 			request('http://www.baidu.com/s?wd=' + encodeURI(obj.question), (error, response, body) => {
 				if (!error && response.statusCode === 200) {
-					let str      = '';
-					const $      = cheerio.load(body);
-					const newArr = [];
+					let str          = '';
+					const $          = cheerio.load(body);
+					const newArr     = [];
+					const contentArr = [];
 					
 					for (let item in $('.result.c-container')) {
 						if (parseInt(item) !== NaN && parseInt(item) < 20) {
-							str += $($('.result.c-container')[item]).text();
+							
+							const itemElement = $($('.result.c-container')[item]);
+							
+							let title        = itemElement.find('.t a').html();
+							title            = title.replace(/(<(?!\/?(em|style)(\s|\>))[^>]*>)/g, '');
+							title            = title.replace(/<style\s*.*>\s*.*<\/style>/g, '');
+							
+							const desc1      = itemElement.find('.c-abstract').html() || '';
+							const desc2      = itemElement.find('.c-gap-top-small').html() || '';
+							let desc         = desc1 + desc2;
+							desc             = desc.replace(/(<(?!\/?(em|style)(\s|\>))[^>]*>)/g, '');
+							desc             = desc.replace(/<style\s*.*>\s*.*<\/style>/g, '');
+							desc             = he.decode(desc);
+
+							for(let v in obj.answer){
+								desc = desc.replace(obj.answer[v].words, '<small>'+obj.answer[v].words+'</small>');
+							}
+							
+							contentArr[item] = {title: '<h5>' +title+ '</h5>' , desc: '<p>' + desc + '</p>'};
+							
+							str += itemElement.text();
 						}
 					}
 					
@@ -49,7 +85,8 @@ class Main{
 						newOBj: {
 							title : obj.question,
 							data  : newArr
-						}
+						},
+						contentHtml: contentArr
 					}
 					
 					resolve(lastObj);
@@ -122,9 +159,6 @@ class Main{
 					answer   : answer
 				}
 				
-				
-				console.log(obj);
-				
 				resolve(obj);
 				
 			}).catch(function (err) {
@@ -138,11 +172,10 @@ class Main{
 	
 	_sendServiceMessage(lastObj) {
 		
-		const countTime = (new Date().getTime() / 100) - (startTime / 100);
+		lastObj.newOBj.startTime = startTime;
+		const contentHtmlString = JSON.stringify(lastObj.contentHtml);
 		
-		console.log(countTime);
-		
-		this.socket.emit('sendKeyToServerQuestion', lastObj.obj);
+		this.socket.emit('sendKeyToServerQuestion', contentHtmlString);
 		this.socket.emit('sendKeyToServerAnswer', lastObj.newOBj);
 	}
 	
@@ -164,6 +197,8 @@ class Main{
 	}
 	
 }
+
+//console.log('asdasd'+'hello'.prompt + 'asdasd');
 
 const main = new Main();
 main.init();
